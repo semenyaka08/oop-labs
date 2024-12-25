@@ -1,0 +1,10 @@
+﻿<Window x:Class="Object2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Object2 - Matrix Viewer" Height="450" Width="600">
+    <Grid Margin="10">
+        <TextBox x:Name="MatrixDisplayTextBox" Margin="0"
+                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                 IsReadOnly="True" TextWrapping="NoWrap" FontFamily="Consolas" FontSize="14"/>
+    </Grid>
+</Window>

@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Images\ToolBarIcons\DALL·E 2024-10-24 13.31.23 - A simple and minimalistic icon of a single point for a drawing application. The icon should feature a small filled circle at the center, clearly disti.webp" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\ToolBarIcons\dot.png" />
+      <Resource Include="Images\ToolBarIcons\dot.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+      <None Remove="Images\ToolBarIcons\ellipse.png" />
+      <Resource Include="Images\ToolBarIcons\ellipse.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+      <None Remove="Images\ToolBarIcons\line.png" />
+      <Resource Include="Images\ToolBarIcons\line.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+      <None Remove="Images\ToolBarIcons\rectangle.png" />
+      <Resource Include="Images\ToolBarIcons\rectangle.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,48 @@
+﻿<Window x:Class="Lab4.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="IShape Drawer" Height="450" Width="800">
+    <DockPanel>
+        <!-- Menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="Файл"/>
+            <MenuItem Header="Об'єкти">
+                <MenuItem Header="Лінія" Click="OnLineClick"/>
+                <MenuItem Header="Прямокутник" Click="OnRectangleClick"/>
+                <MenuItem Header="Точка" Click="OnPointClick"/>
+                <MenuItem Header="Еліпс" Click="OnEllipseClick"/>
+                <MenuItem Header="Лінія з кружечками" Click="OnLineWithCirclesClick"/>
+                <MenuItem Header="Куб" Click="OnCubeClick"/>
+            </MenuItem>
+            <MenuItem Header="Довідка"/>
+            <MenuItem Header="Вибрано: Жодної фігури" x:Name="SelectedShapeMenuItem"/>
+        </Menu>
+
+        <ToolBar DockPanel.Dock="Top">
+            <Button Width="50" Margin="5" Click="OnPointClick" ToolTip="Точка">
+                <Image Source="images/ToolBarIcons/dot.png" Width="24" Height="24" />
+            </Button>
+            <Button Width="50" Margin="5" Click="OnEllipseClick" ToolTip="Еліпс">
+                <Image Source="/Images/ToolBarIcons/ellipse.png" Width="24" Height="24" />
+            </Button>
+            <Button Width="50" Margin="5" Click="OnLineClick" ToolTip="Лінія">
+                <Image Source="images/ToolBarIcons/line.png" Width="24" Height="24" />
+            </Button>
+            <Button Width="50" Margin="5" Click="OnRectangleClick" ToolTip="Прямокутник">
+                <Image Source="images/ToolBarIcons/rectangle.png" Width="24" Height="24" />
+            </Button>
+            <Button Width="50" Margin="5" Click="OnCubeClick" ToolTip="Куб">
+                <Image Source="images/ToolBarIcons/cube.png" Width="24" Height="24" />
+            </Button>
+            <Button Width="50" Margin="5" Click="OnLineWithCirclesClick" ToolTip="Лінія з кружечками">
+                <Image Source="images/ToolBarIcons/line-between-circles.png" Width="24" Height="24" />
+            </Button>
+        </ToolBar>
+        
+        <!-- Drawing Canvas -->
+        <Canvas Name="DrawingCanvas" Background="White"
+                MouseDown="Canvas_MouseDown"
+                MouseMove="Canvas_MouseMove"
+                MouseUp="Canvas_MouseUp"/>
+    </DockPanel>
+</Window>
