@@ -1,82 +1,78 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.IO.Pipes;
+using System.Text;
 using System.Windows;
 
 namespace Object2
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        private string _lastClipboardText = string.Empty;
-        
         public MainWindow()
         {
             InitializeComponent();
-            StartClipboardWatcher();
+            StartNamedPipeServer();
         }
 
-        private void StartClipboardWatcher()
+        private async void StartNamedPipeServer()
         {
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 while (true)
                 {
-                    await Task.Delay(500); 
-                    string clipboardText = string.Empty;
-
-                    Application.Current.Dispatcher.Invoke(() =>
+                    try
                     {
-                        if (Clipboard.ContainsText())
+                        await using var pipeServer = new NamedPipeServerStream("Lab6ToObject2", PipeDirection.In);
+                        await pipeServer.WaitForConnectionAsync();
+                        
+                        using var reader = new StreamReader(pipeServer);
+                        string? data = await reader.ReadLineAsync();
+                        
+                        if (data != null)
                         {
-                            clipboardText = Clipboard.GetText();
+                            Application.Current.Dispatcher.Invoke(() => OnDataReceived(data));
                         }
-                    });
-
-                    if (clipboardText != _lastClipboardText)
+                    }
+                    catch (Exception ex)
                     {
-                        _lastClipboardText = clipboardText;
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            OnClipboardUpdated(clipboardText);
-                        });
+                        LogToFile($"Помилка з'єднання: {ex.Message}");
                     }
                 }
             });
         }
         
-        private void OnClipboardUpdated(string clipboardText)
+        private void OnDataReceived(string data)
         {
             try
             {
-                int[,] matrix = ParseMatrixFromString(clipboardText);
-                DisplayMatrix(matrix);
+                int[,] matrix = ParseMatrixFromString(data);
+                string value = DisplayMatrix(matrix);
+                Clipboard.SetText(value);
+                LogToFile($"Вхідні дані: {data}");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка обновления: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Помилка обробки даних: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private int[,] ParseMatrixFromString(string matrixString)
+        private int[,] ParseMatrixFromString(string data)
         {
-            string[] parameters = matrixString.Split(',');
+            string[] parameters = data.Split(',');
 
-            // Перевіряємо, чи маємо три параметри
             if (parameters.Length != 3)
             {
                 throw new FormatException("Рядок повинен містити три параметри: n, min, max.");
             }
 
-            // Парсимо параметри
             int n = int.Parse(parameters[0].Trim());
             int min = int.Parse(parameters[1].Trim());
             int max = int.Parse(parameters[2].Trim());
 
-            // Перевіряємо, чи min не більше max
             if (min > max)
             {
                 throw new ArgumentException("Мінімальне значення не може бути більше максимального.");
             }
 
-            // Генеруємо матрицю
             int[,] matrix = new int[n, n];
             Random rand = new Random();
 
@@ -91,7 +87,7 @@ namespace Object2
             return matrix;
         }
 
-        private void DisplayMatrix(int[,] matrix)
+        private string DisplayMatrix(int[,] matrix)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -104,9 +100,9 @@ namespace Object2
                 sb.AppendLine();
             }
             string serializedMatrix = SerializeMatrix(matrix);
-            Clipboard.SetText(serializedMatrix);
-            _lastClipboardText = serializedMatrix;
+            LogToFile(serializedMatrix);
             MatrixDisplayTextBox.Text = sb.ToString();
+            return serializedMatrix;
         }
         
         private static string SerializeMatrix(int[,] matrix)
@@ -124,6 +120,13 @@ namespace Object2
                     sb.AppendLine();
             }
             return sb.ToString();
+        }
+        
+        private void LogToFile(string message)
+        {
+            string logFilePath = "logObject2.txt";
+            using StreamWriter writer = new StreamWriter(logFilePath, append: true);
+            writer.WriteLine($"{DateTime.Now}: {message}");
         }
     }
 }

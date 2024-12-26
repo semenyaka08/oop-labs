@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Windows;
 
 namespace Lab6
@@ -28,63 +29,27 @@ namespace Lab6
                     return;
                 }
 
-                string clipboardData = $"{n},{min},{max}";
+                string data = $"{n},{min},{max}";
                 
-                Clipboard.SetText(clipboardData);
+                LogToFile(data);
                 
-                // Запуск Object2
                 string object2Path = Path.Combine("D:\\OOPLabs\\Lab6\\Object2\\bin\\Debug\\net9.0-windows\\Object2.exe");
                 if (File.Exists(object2Path))
                 {
-                    if (_process2 == null)
-                    {
-                        _process2 = new Process
-                        {
-                            StartInfo = new ProcessStartInfo
-                            {
-                                FileName = object2Path,
-                                UseShellExecute = true
-                            }
-                        };
-                        _process2.Start();
-                        _process2.EnableRaisingEvents = true;
-                        _process2.Exited += (s, args) => _process2 = null;
-                    }
+                    _process2 ??= Process.Start(object2Path);
                 }
                 else
                 {
                     MessageBox.Show("Не знайдено Object2.exe.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                
-                await Task.Delay(500);
-                
-                Console.WriteLine("********");
-                Console.WriteLine(Clipboard.GetText());
-                
+
+                await SendDataThroughNamedPipeAsync("Lab6ToObject2", data);
                 
                 string object3Path = Path.Combine("D:\\OOPLabs\\Lab6\\Object3\\bin\\Debug\\net9.0-windows\\Object3.exe");
                 if (File.Exists(object3Path))
                 {
-                    string clipText = Clipboard.GetText();
-                    Console.WriteLine($"Clipboard text within object3:");
-                    Console.Write(clipText);
-                    
-                    if (_process3 == null)
-                    {
-                        _process3 = new Process
-                        {
-                            StartInfo = new ProcessStartInfo
-                            {
-                                FileName = object3Path,
-                                UseShellExecute = true
-                            }
-                        };
-                        _process3.Start();
-                        _process3.EnableRaisingEvents = true;
-                        _process3.Exited += (s, args) => _process3 = null;
-                    }
-                    
+                    _process3 ??= Process.Start(object3Path);
                 }
                 else
                 {
@@ -99,6 +64,29 @@ namespace Lab6
             {
                 MessageBox.Show($"Сталася помилка: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        
+        private async Task SendDataThroughNamedPipeAsync(string pipeName, string data)
+        {
+            await using var pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.Out);
+            try
+            {
+                await pipeClient.ConnectAsync(3000);
+                await using var writer = new StreamWriter(pipeClient);
+                writer.AutoFlush = true;
+                await writer.WriteLineAsync(data);
+            }
+            catch (Exception ex)
+            {
+                LogToFile($"Помилка передачі даних: {ex.Message}");
+            }
+        }
+        
+        private void LogToFile(string message)
+        {
+            string logFilePath = "logLab6.txt";
+            using StreamWriter writer = new StreamWriter(logFilePath, append: true);
+            writer.WriteLine($"{DateTime.Now}: {message}");
         }
     }
 }
