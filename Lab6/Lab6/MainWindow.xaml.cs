@@ -66,6 +66,12 @@ namespace Lab6
             }
         }
         
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _process2?.CloseMainWindow();
+            _process3?.CloseMainWindow();
+        }
+        
         private async Task SendDataThroughNamedPipeAsync(string pipeName, string data)
         {
             await using var pipeClient = new NamedPipeClientStream(".", pipeName, PipeDirection.Out);
